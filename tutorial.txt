@@ -1,0 +1,8 @@
+npx sequelize init
+
+npx sequelize model:generate --name User --attributes name:string,email:string,password:string,role:enum
+npx sequelize model:generate --name Profile --attributes bio:text,skills:string,resume:string,userId:integer
+npx sequelize model:generate --name Job --attributes title:string,description:text,location:string,salary:decimal,employerId:integer
+npx sequelize model:generate --name Application --attributes jobId:integer,applicantId:integer,status:enum
+
+ npx sequelize db:migrate
