@@ -10,6 +10,7 @@ const logoutRouter = require('./auth/logout');
 //Databases
 const { Notification, User, Job } = require('../models');
 const { Op } = require('sequelize');
+const notification = require('../models/notification');
 
 
 
@@ -32,24 +33,52 @@ router.use('/', logoutRouter);
 
 //! /Profile methods
 router.get('/', async function (req, res) {
-
   Notification.sync();
   User.sync();
   if (req.session.user) {
-    const notifications = await Notification.findAll({
-      where: {
-        [Op.and]: [
-          { isAccepted: 0 },
-          { userId: req.session.user.email }
-        ]
+      // Fetch receiver notifications
+      const receiverNotifications = await Notification.findAll({
+          where: {
+              [Op.and]: [
+                  { isAccepted: 0 },
+                  { receiverEmail: req.session.user.email }
+              ]
+          }
+      });
+
+      // Fetch applicant notifications
+      const applicantNotifications = await Notification.findAll({
+          where: {
+              [Op.or]: [
+                  { isAccepted: 1 },
+                  { isAccepted: -1 }
+              ],
+              userId: req.session.user.email
+          }
+      });
+
+      const user = await User.findOne({ where: { email: req.session.user.email } });
+
+      if (receiverNotifications.length > 0) {
+          return res.render('profile', {
+              user: user,
+              notifications: receiverNotifications.length,
+              isReceiver: true
+          });
+      } else {
+          return res.render('profile', {
+              user: user,
+              notifications: applicantNotifications.length,
+              isReceiver: false
+          });
       }
-    });
-    const user = await User.findOne({ where: { email: req.session.user.email } });
-    return res.render('profile', { notifications: notifications.length, user: user });
   } else {
-    return res.redirect('/profile/login');// Redirect if not logged in
+      res.redirect('/profile/login');
   }
 });
+
+
+
 
 
 router.post('/', upload.fields([{ name: 'profileImage', maxCount: 1 }, { name: 'resume', maxCount: 1 }]), async function (req, res) {
@@ -77,22 +106,29 @@ router.get('/notifications', function (req, res) {
     return res.redirect('/profile/login');
   }
 
-  // Fetch all notifications for the logged in user
-  Notification.findAll({
-    where: {
-      [Op.or]: [
-        { receiverEmail: req.session.user.email },
-        { userId: req.session.user.email }
-      ]
-    }
-  }).then((notifications) => {
-    const isReceiver = notifications.some(notification => notification.receiverEmail === req.session.user.email);
-    res.render('notification', { notifications: notifications, isReceiver: isReceiver });
-  }).catch((error) => {
-    console.error('Error fetching notifications:', error);
-    res.status(500).send('Internal Server Error');
+  // Fetch receiver notifications
+  const applicantNotifications = Notification.findAll({
+    where: { receiverEmail: req.session.user.email }
   });
+
+  // Fetch applicant notifications
+  const receiverNotifications = Notification.findAll({
+    where: { userId: req.session.user.email }
+  });
+
+  Promise.all([receiverNotifications, applicantNotifications])
+    .then(([receiverNotifications, applicantNotifications]) => {
+      return res.render('notification', {
+        receiverNotifications: receiverNotifications,
+        applicantNotifications: applicantNotifications
+      });
+    })
+    .catch((error) => {
+      console.error('Error fetching notifications:', error);
+      res.status(500).send('Internal Server Error');
+    });
 });
+
 
 
 //! /Profile/listings
@@ -151,7 +187,7 @@ router.get('/:jobId', async function (req, res) {
   Notification.sync();
   User.sync();
   const notification = await Notification.findOne({ where: { id: jobId } });
-  if(!notification)
+  if (!notification)
     return res.status(404).send('Notification not found');
   const user = await User.findOne({ where: { email: notification.userId } });
   res.render('profileView', { user: user });

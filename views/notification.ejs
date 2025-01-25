@@ -28,71 +28,75 @@
     <div class="container">
         <h1 class="mb-4">Notifications</h1>
         <div class="row">
-            <% notifications.forEach(element=> { %>
-                <div class="col mb-4">
-                    <div class="card job-card">
+            <div class="col-md-6">
+
+                <% applicantNotifications.forEach(element => { %>
+                    <div class="card mb-3 job-card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
-                                <h5 class="card-title">
-                                    <%= element.userName %>
-                                </h5>
-                                <% if (element.isAccepted===1) { %>
+                                <h5 class="card-title"><%= element.userName %></h5>
+                                <% if (element.isAccepted === 1) { %>
                                     <span class="badge bg-success">Accepted</span>
-                                    <% } else if (element.isAccepted===-1) { %>
-                                        <span class="badge bg-danger">Rejected</span>
-                                        <% } else { %>
-                                            <span class="badge bg-primary">Not Reviewed</span>
-                                            <% } %>
-                            </div>
-                            <p class="card-text">Email: <%= element.userEmail %>
-                            </p>
-                            <p class="card-text">Attachment: <a href="<%= element.uploadPath %>" target="_blank">View
-                                    File</a></p>
-                            <% if (isReceiver) { %>
-                                <button class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#applicationModal<%= element.id %>">View</button>
+                                <% } else if (element.isAccepted === -1) { %>
+                                    <span class="badge bg-danger">Rejected</span>
                                 <% } else { %>
-                                    <button class="btn btn-primary">They will contact you</button>
-                                    <% } %>
+                                    <span class="badge bg-primary">Not Reviewed</span>
+                                <% } %>
+                            </div>
+                            <p class="card-text">Email: <%= element.userEmail %></p>
+                            <p class="card-text">Attachment: <a href="<%= element.uploadPath %>" target="_blank">View File</a></p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#applicationModal<%= element.id %>">View</button>
                         </div>
                     </div>
-                </div>
-                
-                <form method="post">
-                    <div class="modal fade" id="applicationModal<%= element.id %>" tabindex="-1"
-                        aria-labelledby="applicationModalLabel" aria-hidden="true">
+
+                    <!-- Modal for Accept/Reject Application -->
+                    <div class="modal fade" id="applicationModal<%= element.id %>" tabindex="-1" aria-labelledby="applicationModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="applicationModalLabel">Application Details</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
                                     <h6>Name:</h6>
-                                    <p>
-                                        <%= element.userName %>
-                                    </p>
+                                    <p><%= element.userName %></p>
                                     <h6>Email:</h6>
-                                    <p>
-                                        <%= element.userEmail %>
-                                    </p>
+                                    <p><%= element.userEmail %></p>
                                     <h6>Document:</h6>
                                     <p><a href="<%= element.uploadPath %>" target="_blank">View Document</a></p>
                                     <h6>View Profile:</h6>
                                     <p><a href="/profile/<%= element.id %>" target="_blank">User Profile</a></p>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-success"
-                                        onclick="document.location = '<%= element.id %>/accepted'">Accept</button>
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="document.location = '<%= element.id %>/rejected'">Reject</button>
+                                    <button type="button" class="btn btn-success" onclick="document.location = '<%= element.id %>/accepted'">Accept</button>
+                                    <button type="button" class="btn btn-danger" onclick="document.location = '<%= element.id %>/rejected'">Reject</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </form>
                 <% }); %>
+            </div>
+            <div class="col-md-6">
+                <% receiverNotifications.forEach(element => { %>
+                    <div class="card mb-3 job-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="card-title"><%= element.userName %></h5>
+                                <% if (element.isAccepted === 1) { %>
+                                    <span class="badge bg-success">Accepted</span>
+                                <% } else if (element.isAccepted === -1) { %>
+                                    <span class="badge bg-danger">Rejected</span>
+                                <% } else { %>
+                                    <span class="badge bg-primary">Not Reviewed</span>
+                                <% } %>
+                            </div>
+                            <p class="card-text">Email: <%= element.userEmail %></p>
+                            <p class="card-text">Attachment: <a href="<%= element.uploadPath %>" target="_blank">View File</a></p>
+                            <button class="btn btn-primary">They will contact you</button>
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
         </div>
     </div>
 
