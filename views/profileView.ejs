@@ -71,7 +71,7 @@
             <p><strong>Info:</strong>
                 <%= user.info %>
             </p>
-            <% if (user.resumePath == !null) {%>
+            <% if (user.resumePath) {%>
                 <a href="<%= user.resumePath %>" class="resume-link" target="_blank" download>Download Resume</a>
                 <% }%>
         </div>
